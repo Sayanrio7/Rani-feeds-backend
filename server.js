@@ -16,6 +16,7 @@ const galleryRoutes = require("./router/galleryRoutes");
 const videoRoutes = require("./router/videoRoutes");
 const aboutRoutes = require("./router/aboutRoutes");
 const blogRoutes = require("./router/blogRoutes");
+const categoryRoutes = require("./router/categoryRoutes");
 
 app.use("/api/products", productRoutes);
 app.use("/api/enquiries", enquiryRoutes);
@@ -23,6 +24,7 @@ app.use("/api/gallery", galleryRoutes);
 app.use("/api/videos", videoRoutes);
 app.use("/api/about", aboutRoutes);
 app.use("/api/blogs", blogRoutes);
+app.use("/api/category", categoryRoutes);
 
 const PORT = process.env.PORT || 5000;
 

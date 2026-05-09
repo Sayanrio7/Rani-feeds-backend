@@ -28,7 +28,7 @@ module.exports = class ProductController {
 
       const data = {
         name,
-        category: "Fish Feed",
+        category: req.body.category,
         protein: req.body.protein,
         sizeOptions: req.body.sizeOptions
           ? JSON.parse(req.body.sizeOptions)
@@ -124,7 +124,30 @@ module.exports = class ProductController {
 
   static fetchAll = async (req, res) => {
     try {
-      const result = await Product.find({ isActive: true });
+      const result = await Product.find({
+        isActive: true,
+      }).populate("category");
+
+      return res.status(200).json({
+        success: true,
+        data: result,
+      });
+    } catch (err) {
+      return res.status(500).json({
+        success: false,
+        message: err.message,
+      });
+    }
+  };
+
+  static getProductsByCategory = async (req, res) => {
+    try {
+      const { categoryId } = req.params;
+
+      const result = await Product.find({
+        category: categoryId,
+        isActive: true,
+      }).populate("category");
 
       return res.status(200).json({
         success: true,
@@ -142,7 +165,7 @@ module.exports = class ProductController {
     try {
       const { id } = req.params;
 
-      const result = await Product.findById(id);
+      const result = await Product.findById(id).populate("category");
       if (!result) throw new Error("Product not found");
 
       return res.status(200).json({

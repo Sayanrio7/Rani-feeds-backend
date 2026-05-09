@@ -23,6 +23,7 @@ module.exports = class GalleryController {
 
       const data = {
         title: req.body.title,
+        description: req.body.description,
         images: imageUrls,
       };
 
@@ -78,6 +79,7 @@ module.exports = class GalleryController {
       }
 
       existing.title = req.body.title || existing.title;
+      existing.description = req.body.description || existing.description;
 
       await existing.save();
 

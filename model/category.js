@@ -1,39 +1,28 @@
 const mongoose = require("../database/dbConnection");
 
 module.exports = mongoose.model(
-  "product",
+  "category",
   mongoose.Schema(
     {
       name: {
         type: String,
         required: true,
       },
-      category: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "category",
+
+      slug: {
+        type: String,
         required: true,
+        unique: true,
       },
-      protein: {
+
+      image: {
         type: String,
       },
-      sizeOptions: [
-        {
-          type: String,
-        },
-      ],
+
       description: {
         type: String,
       },
-      benefits: [
-        {
-          type: String,
-        },
-      ],
-      images: [
-        {
-          type: String,
-        },
-      ],
+
       isActive: {
         type: Boolean,
         default: true,
