@@ -13,29 +13,55 @@ module.exports = class ProductController {
         throw new Error("Product name is required");
       }
 
-      if (!files || files.length === 0) {
-        throw new Error("At least one image is required");
-      }
+      const productImages = files?.productImages || [];
 
-      if (files.length > 5) {
-        throw new Error("Maximum 5 images allowed");
+      if (productImages.length === 0) {
+        throw new Error("At least one product image is required");
       }
 
       const protocol = req.headers["x-forwarded-proto"] || req.protocol;
+
       const baseUrl = protocol + "://" + req.get("host") + "/uploads/";
 
-      const imageUrls = files.map((file) => baseUrl + file.filename);
+      // PRODUCT IMAGES
+      const imageUrls = productImages.map((file) => baseUrl + file.filename);
+
+      // SIZE CARDS
+      const sizeCardsData = req.body.sizeCards
+        ? JSON.parse(req.body.sizeCards)
+        : [];
+
+      const sizeCardImages = files?.sizeCardImages || [];
+
+      const finalSizeCards = sizeCardsData.map((card, index) => ({
+        title: card.title,
+        image: sizeCardImages[index]
+          ? baseUrl + sizeCardImages[index].filename
+          : "",
+      }));
 
       const data = {
         name,
+
         category: req.body.category,
-        protein: req.body.protein,
+
+        bagWeight: req.body.bagWeight,
+
         sizeOptions: req.body.sizeOptions
           ? JSON.parse(req.body.sizeOptions)
           : [],
+
         description: req.body.description,
+
         benefits: req.body.benefits ? JSON.parse(req.body.benefits) : [],
+
+        ingredients: req.body.ingredients
+          ? JSON.parse(req.body.ingredients)
+          : [],
+
         images: imageUrls,
+
+        sizeCards: finalSizeCards,
       };
 
       const result = await Product.create(data);
@@ -46,10 +72,17 @@ module.exports = class ProductController {
         data: result,
       });
     } catch (err) {
+      // DELETE UPLOADED FILES IF ERROR
       if (files) {
+        const allFiles = [
+          ...(files.productImages || []),
+          ...(files.sizeCardImages || []),
+        ];
+
         await Promise.all(
-          files.map(async (file) => {
+          allFiles.map(async (file) => {
             const filePath = path.join(process.cwd(), "uploads", file.filename);
+
             await fs.unlink(filePath).catch(() => {});
           }),
         );
@@ -69,25 +102,59 @@ module.exports = class ProductController {
       const { id } = req.params;
 
       const existing = await Product.findById(id);
+
       if (!existing) throw new Error("Product not found");
 
       const protocol = req.headers["x-forwarded-proto"] || req.protocol;
+
       const baseUrl = protocol + "://" + req.get("host") + "/uploads/";
 
-      if (files && files.length > 0) {
+      // PRODUCT IMAGES UPDATE
+      if (files?.productImages && files.productImages.length > 0) {
         await Promise.all(
           existing.images.map(async (img) => {
             const filename = path.basename(img);
+
             const filePath = path.join(process.cwd(), "uploads", filename);
+
             await fs.unlink(filePath).catch(() => {});
           }),
         );
 
-        existing.images = files.map((file) => baseUrl + file.filename);
+        existing.images = files.productImages.map(
+          (file) => baseUrl + file.filename,
+        );
+      }
+
+      // SIZE CARD UPDATE
+      if (req.body.sizeCards) {
+        // DELETE OLD CARD IMAGES
+        await Promise.all(
+          existing.sizeCards.map(async (card) => {
+            const filename = path.basename(card.image);
+
+            const filePath = path.join(process.cwd(), "uploads", filename);
+
+            await fs.unlink(filePath).catch(() => {});
+          }),
+        );
+
+        const sizeCardsData = JSON.parse(req.body.sizeCards);
+
+        const sizeCardImages = files?.sizeCardImages || [];
+
+        existing.sizeCards = sizeCardsData.map((card, index) => ({
+          title: card.title,
+          image: sizeCardImages[index]
+            ? baseUrl + sizeCardImages[index].filename
+            : "",
+        }));
       }
 
       existing.name = req.body.name || existing.name;
-      existing.protein = req.body.protein || existing.protein;
+
+      existing.bagWeight = req.body.bagWeight || existing.bagWeight;
+
       existing.description = req.body.description || existing.description;
 
       if (req.body.sizeOptions) {
@@ -96,6 +163,10 @@ module.exports = class ProductController {
 
       if (req.body.benefits) {
         existing.benefits = JSON.parse(req.body.benefits);
+      }
+
+      if (req.body.ingredients) {
+        existing.ingredients = JSON.parse(req.body.ingredients);
       }
 
       await existing.save();
@@ -107,9 +178,15 @@ module.exports = class ProductController {
       });
     } catch (err) {
       if (files) {
+        const allFiles = [
+          ...(files.productImages || []),
+          ...(files.sizeCardImages || []),
+        ];
+
         await Promise.all(
-          files.map(async (file) => {
+          allFiles.map(async (file) => {
             const filePath = path.join(process.cwd(), "uploads", file.filename);
+
             await fs.unlink(filePath).catch(() => {});
           }),
         );
@@ -185,12 +262,29 @@ module.exports = class ProductController {
       const { id } = req.params;
 
       const product = await Product.findById(id);
-      if (!product) throw new Error("Product not found");
 
+      if (!product) {
+        throw new Error("Product not found");
+      }
+
+      // DELETE PRODUCT IMAGES
       await Promise.all(
         product.images.map(async (img) => {
           const filename = path.basename(img);
+
           const filePath = path.join(process.cwd(), "uploads", filename);
+
+          await fs.unlink(filePath).catch(() => {});
+        }),
+      );
+
+      // DELETE SIZE CARD IMAGES
+      await Promise.all(
+        product.sizeCards.map(async (card) => {
+          const filename = path.basename(card.image);
+
+          const filePath = path.join(process.cwd(), "uploads", filename);
+
           await fs.unlink(filePath).catch(() => {});
         }),
       );
