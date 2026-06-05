@@ -26,6 +26,13 @@ app.use("/api/about", aboutRoutes);
 app.use("/api/blogs", blogRoutes);
 app.use("/api/category", categoryRoutes);
 
+app.get("/", (req, res) => {
+  res.json({
+    success: true,
+    message: "Rani Feeds Backend is Running 🚀",
+  });
+});
+
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
