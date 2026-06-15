@@ -19,7 +19,7 @@ const blogRoutes = require("./router/blogRoutes");
 const categoryRoutes = require("./router/categoryRoutes");
 
 app.use("/api/products", productRoutes);
-app.use("/api/enquiries", enquiryRoutes);
+app.use("/api/enquiry", enquiryRoutes);
 app.use("/api/gallery", galleryRoutes);
 app.use("/api/videos", videoRoutes);
 app.use("/api/about", aboutRoutes);

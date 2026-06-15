@@ -21,7 +21,7 @@ module.exports = mongoose.model(
         enum: [
           "General Inquiry",
           "Product Inquiry",
-          "Bulk Order",
+          "Order / Bulk Order",
           "Dealership",
           "Support",
         ],

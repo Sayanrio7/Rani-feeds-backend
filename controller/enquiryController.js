@@ -11,16 +11,21 @@ module.exports = class EnquiryController {
         throw new Error("Name, phone and subject are required");
       }
 
-      const subjectsRequiringProduct = ["Product Inquiry", "Bulk Order"];
+      const subjectsRequiringProduct = [
+        "Product Inquiry",
+        "Order / Bulk Order",
+      ];
 
       if (subjectsRequiringProduct.includes(subject) && !productId) {
         throw new Error("Product is required for this subject");
       }
 
-      let product = null;
       if (productId) {
-        product = await Product.findById(productId);
-        if (!product) throw new Error("Product not found");
+        const product = await Product.findById(productId);
+
+        if (!product) {
+          throw new Error("Product not found");
+        }
       }
 
       const data = {
