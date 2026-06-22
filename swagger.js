@@ -17,15 +17,14 @@ const options = {
 
     servers: [
       {
+        url: "https://rani-feeds-backend.onrender.com",
+        description: "Production Server",
+      },
+      {
         url: "http://localhost:5000",
         description: "Development Server",
       },
-      {
-        url: "https://api.ranifeeds.in",
-        description: "Production Server",
-      },
     ],
-
     tags: [
       {
         name: "Products",
